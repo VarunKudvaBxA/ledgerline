@@ -1,0 +1,28 @@
+# One command to run everything:  docker compose up --build
+services:
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: [mongo-data:/data/db]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  server:
+    build: ./server
+    env_file: ./server/.env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ledgerline
+      REDIS_URL: redis://redis:6379
+      CLIENT_URL: http://localhost:8081
+    depends_on: [mongo, redis]
+    ports: ["5001:5001"]
+
+  client:
+    build: ./client
+    depends_on: [server]
+    ports: ["8081:80"]
+
+volumes:
+  mongo-data:
